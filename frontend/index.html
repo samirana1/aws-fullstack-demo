@@ -3,28 +3,26 @@
 <head>
 <title>AWS Fullstack Demo</title>
 </head>
-
 <body>
 
 <h1>Frontend hosted on AWS Amplify</h1>
-
 <button onclick="callAPI()">Call Backend</button>
-
 <p id="result"></p>
 
 <script>
-
-async function callAPI(){
-
-const response = await fetch("http://fullstack-alb-1016065317.us-east-1.elb.amazonaws.com");
-
-const data = await response.json();
-
-document.getElementById("result").innerText =
-JSON.stringify(data);
-
+async function callAPI() {
+  try {
+    document.getElementById("result").innerText = "Loading...";
+    const response = await fetch("http://fullstack-alb-1016065317.us-east-1.elb.amazonaws.com/health", {
+      method: "GET",
+      mode: "cors"
+    });
+    const data = await response.json();
+    document.getElementById("result").innerText = JSON.stringify(data);
+  } catch(err) {
+    document.getElementById("result").innerText = "Error: " + err.message;
+  }
 }
-
 </script>
 
 </body>
