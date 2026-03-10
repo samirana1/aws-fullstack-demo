@@ -1,14 +1,56 @@
-from flask import Flask
+from flask import Flask, jsonify
+import os
+import psycopg2
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
+# Database connection helper
+def get_db_connection():
+    try:
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST'),
+            database=os.getenv('DB_NAME', 'myappdb'),
+            user=os.getenv('DB_USER', 'admin'),
+            password=os.getenv('DB_PASSWORD'),
+            port=os.getenv('DB_PORT', '5432')
+        )
+        return conn
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        return None
 
 @app.route("/")
 def home():
-    return {"message": "Backend running successfully in ECS"}
+    return jsonify({"message": "Backend running successfully in ECS", "version": "1.0"})
 
 @app.route("/health")
 def health():
-    return {"status": "healthy"}
+    # Check database connectivity
+    db_status = "disconnected"
+    try:
+        conn = get_db_connection()
+        if conn:
+            conn.close()
+            db_status = "connected"
+    except:
+        pass
+    
+    return jsonify({
+        "status": "healthy",
+        "database": db_status,
+        "service": "backend-api"
+    })
+
+@app.route("/api/data")
+def get_data():
+    return jsonify({
+        "data": [
+            {"id": 1, "name": "Sample Item 1"},
+            {"id": 2, "name": "Sample Item 2"}
+        ]
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
