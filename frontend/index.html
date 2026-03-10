@@ -11,12 +11,9 @@
 
 <script>
 async function callAPI() {
+  document.getElementById("result").innerText = "Loading...";
   try {
-    document.getElementById("result").innerText = "Loading...";
-    const response = await fetch("http://fullstack-alb-1016065317.us-east-1.elb.amazonaws.com/health", {
-      method: "GET",
-      mode: "cors"
-    });
+    const response = await fetch("https://backend.usmanali.site/health");
     const data = await response.json();
     document.getElementById("result").innerText = JSON.stringify(data);
   } catch(err) {
