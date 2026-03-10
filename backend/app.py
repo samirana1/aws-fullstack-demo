@@ -4,16 +4,19 @@ import psycopg2
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    "https://main.d2yzt563jf258w.amplifyapp.com",
+    "https://backend.usmanali.site",
+    "http://localhost:3000"
+])
 
-# Database connection helper
 def get_db_connection():
     try:
         conn = psycopg2.connect(
             host=os.getenv('DB_HOST'),
-            database=os.getenv('DB_NAME', 'myappdb'),
-            user=os.getenv('DB_USER', 'admin'),
-            password=os.getenv('DB_PASSWORD'),
+            database=os.getenv('DB_NAME', 'appdb'),
+            user=os.getenv('DB_USER', 'dbadmin'),
+            password=os.getenv('DB_PASS'),  # Changed to DB_PASS
             port=os.getenv('DB_PORT', '5432')
         )
         return conn
@@ -27,7 +30,6 @@ def home():
 
 @app.route("/health")
 def health():
-    # Check database connectivity
     db_status = "disconnected"
     try:
         conn = get_db_connection()
@@ -36,7 +38,6 @@ def health():
             db_status = "connected"
     except:
         pass
-    
     return jsonify({
         "status": "healthy",
         "database": db_status,
