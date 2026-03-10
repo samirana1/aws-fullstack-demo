@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AWS Fullstack Demo</title>
+</head>
+
+<body>
+
+<h1>Frontend hosted on AWS Amplify</h1>
+
+<button onclick="callAPI()">Call Backend</button>
+
+<p id="result"></p>
+
+<script>
+
+async function callAPI(){
+
+const response = await fetch("http://BACKEND_URL");
+
+const data = await response.json();
+
+document.getElementById("result").innerText =
+JSON.stringify(data);
+
+}
+
+</script>
+
+</body>
+</html>
