@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 127424156209.dkr.ecr.us-east-1.amazonaws.com
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
+
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker buildx create --use
+      - docker buildx build --platform linux/amd64 --push -t 127424156209.dkr.ecr.us-east-1.amazonaws.com/backend-demo:latest -t 127424156209.dkr.ecr.us-east-1.amazonaws.com/backend-demo:$IMAGE_TAG ./backend
+
+  post_build:
+    commands:
+      - echo Writing image definitions...
+      - printf '[{"name":"backend","imageUri":"127424156209.dkr.ecr.us-east-1.amazonaws.com/backend-demo:latest"}]' > imagedefinitions.json
+      - cat imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
