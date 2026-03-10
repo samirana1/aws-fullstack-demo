@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RDS PostgreSQL in Private Subnets
+
+Resources:
+
+  # Security Group for RDS
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow DB access from ECS only
+      VpcId: !ImportValue fullstack-vpc-id
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: rds-sg
+
+  # Subnet Group (RDS needs to know which subnets to use)
+  RDSSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private subnets for RDS
+      SubnetIds:
+        - !ImportValue fullstack-private-subnet-1
+        - !ImportValue fullstack-private-subnet-2
+      Tags:
+        - Key: Name
+          Value: rds-subnet-group
+
+  # RDS PostgreSQL Instance
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: fullstack-db
+      DBInstanceClass: db.t3.micro
+      Engine: postgres
+      EngineVersion: "15"
+      MasterUsername: dbadmin
+      MasterUserPassword: MyPassword123!
+      DBName: appdb
+      AllocatedStorage: 20
+      StorageType: gp2
+      MultiAZ: false
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      DBSubnetGroupName: !Ref RDSSubnetGroup
+      Tags:
+        - Key: Name
+          Value: fullstack-rds
+
+Outputs:
+  RDSEndpoint:
+    Value: !GetAtt RDSInstance.Endpoint.Address
+    Export:
+      Name: fullstack-rds-endpoint
+
+  RDSSecurityGroupId:
+    Value: !Ref RDSSecurityGroup
+    Export:
+      Name: fullstack-rds-sg

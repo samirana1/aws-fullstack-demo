@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import os
 import psycopg2
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, origins=[
@@ -51,6 +52,15 @@ def get_data():
             {"id": 1, "name": "Sample Item 1"},
             {"id": 2, "name": "Sample Item 2"}
         ]
+    })
+
+@app.route('/test')
+def test():
+    return jsonify({
+        'status': 'success',
+        'message': 'Backend is working!',
+        'timestamp': datetime.now().isoformat(),
+        'version': '1.0.1'
     })
 
 if __name__ == "__main__":
